@@ -1,0 +1,54 @@
+# ── Python ────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.ipynb_checkpoints/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# ── Raw data (download from Kaggle — see README) ──────────────────────
+data/raw/
+
+# ── Large processed files (regenerate via pipelines — see README) ─────
+data/processed/transactions_small.csv
+data/processed/user_recommendations.csv
+data/processed/rfm_segmented.csv
+data/processed/rfm_segmented.parquet
+data/processed/customers_clean.csv
+data/processed/article_lookup.csv
+data/processed/daily_demand.csv
+
+# ── Database (contains user credentials — never commit) ───────────────
+data/users.db
+
+# ── ChromaDB vector store (rebuild with utils/chroma_setup.py) ────────
+chroma_db/
+
+# ── Frontend build artifacts ──────────────────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+
+# ── Environment / secrets ─────────────────────────────────────────────
+.env
+.env.local
+.env*.local
+frontend/.env.local
+
+# ── IDE / OS ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Scratch files ─────────────────────────────────────────────────────
+*.log
+*.tmp
+er.name
+git
