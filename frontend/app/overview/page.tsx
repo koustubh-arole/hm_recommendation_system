@@ -146,7 +146,7 @@ export default function OverviewPage() {
             <button onClick={fetchStats} disabled={loading} className="btn-outline"
               style={{ padding:"6px 14px", fontSize:11, display:"flex", alignItems:"center", gap:6 }}>
               {loading
-                ? <><span style={{ width:12, height:12, border:"2px solid var(--bor2)", borderTopColor:"var(--gold)", borderRadius:"50%", animation:"spin .7s linear infinite", display:"inline-block" }}/> Loading...</>
+                ? <><span style={{ width:12, height:12, border:"2px solid var(--bor)", borderTopColor:"var(--brand)", borderRadius:"50%", animation:"spin .7s linear infinite", display:"inline-block" }}/> Loading...</>
                 : "↻ Refresh"
               }
             </button>
@@ -155,10 +155,10 @@ export default function OverviewPage() {
 
         {/* KPI grid */}
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:28 }}>
-          <KpiCard loading={loading} title="Total Customers"   value={formatNumber(stats.total_customers)}    icon="👥" color="gold"   change={2.4}  sub="vs last month"   delay={0}  />
-          <KpiCard loading={loading} title="Customer Clusters" value={stats.n_clusters}                       icon="🎯" color="blue"                                         delay={80} />
-          <KpiCard loading={loading} title="Avg Recency"       value={`${stats.avg_recency}d`}                icon="⏱" color="purple" change={-3.2}                         delay={160}/>
-          <KpiCard loading={loading} title="Avg Frequency"     value={stats.avg_frequency.toFixed(1)}         icon="📦" color="green"  change={1.8}  sub="orders/customer"  delay={240}/>
+          <KpiCard loading={loading} title="Total Customers"   value={formatNumber(stats.total_customers)} icon="👥" color="brand"  sub="registered accounts" delay={0}  />
+          <KpiCard loading={loading} title="Customer Clusters" value={stats.n_clusters}                    icon="🎯" color="blue"   sub="RFM segments"        delay={80} />
+          <KpiCard loading={loading} title="Avg Recency"       value={`${stats.avg_recency}d`}            icon="⏱" color="purple" sub="days since last buy"  delay={160}/>
+          <KpiCard loading={loading} title="Avg Frequency"     value={stats.avg_frequency.toFixed(1)}     icon="📦" color="green"  sub="orders / customer"   delay={240}/>
         </div>
 
         {/* Charts row */}

@@ -14,7 +14,7 @@ const INITIAL: Pipeline[] = [
 ];
 
 const COLOR_MAP: Record<string,{top:string;ic:string;btn:string}> = {
-  gold:   { top:"var(--gold)",  ic:"var(--gold-bg)",  btn:"linear-gradient(135deg,var(--gold),#9A6C1A)" },
+  gold:   { top:"var(--brand)", ic:"var(--brand-muted)", btn:"var(--brand)" },
   blue:   { top:"#3B82F6",      ic:"var(--bl-bg)",    btn:"linear-gradient(135deg,#3B82F6,#2563EB)" },
   green:  { top:"#22C55E",      ic:"var(--gr-bg)",    btn:"linear-gradient(135deg,#22C55E,#16A34A)" },
   purple: { top:"#A855F7",      ic:"var(--pu-bg)",    btn:"linear-gradient(135deg,#A855F7,#9333EA)" },
@@ -45,7 +45,7 @@ export default function PipelinesPage() {
     <DashboardShell requireAdmin>
       <div style={{ maxWidth:1000,margin:"0 auto",animation:"fadeUp .4s ease" }}>
         {/* Warning */}
-        <div style={{ padding:"12px 18px",background:"rgba(201,168,76,.05)",border:"1px solid var(--gold-border)",borderRadius:"var(--r)",marginBottom:24,display:"flex",alignItems:"center",gap:10,fontSize:12,color:"var(--gold)" }}>
+        <div style={{ padding:"12px 18px",background:"var(--am-bg)",border:"1px solid var(--am-bor)",borderRadius:"var(--r)",marginBottom:24,display:"flex",alignItems:"center",gap:10,fontSize:12,color:"var(--am)" }}>
           ⚠️ Pipelines run in background threads. Check server logs for progress. For production, use Airflow or a job queue.
         </div>
 
@@ -55,14 +55,14 @@ export default function PipelinesPage() {
             const c = COLOR_MAP[p.color];
             return (
               <div key={p.id} className="card" style={{ padding:22,position:"relative",overflow:"hidden",animationDelay:`${i*80}ms`,animation:"fadeUp .4s ease both",
-                borderColor:p.status==="running"?"var(--gold-border2)":undefined,
+                borderColor:p.status==="running"?"var(--brand-border)":undefined,
               }}>
                 <div style={{ position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${c.top},transparent)` }}/>
                 <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:16 }}>
                   <div style={{ display:"flex",alignItems:"center",gap:12 }}>
                     <div style={{ width:38,height:38,background:c.ic,borderRadius:"var(--r)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20 }}>{p.icon}</div>
                     <div>
-                      <div style={{ fontFamily:"Syne,sans-serif",fontSize:14,fontWeight:700,color:"var(--tx)" }}>{p.name}</div>
+                      <div style={{ fontSize:14,fontWeight:700,color:"var(--tx)" }}>{p.name}</div>
                       <div style={{ fontSize:11,color:"var(--tx3)",marginTop:1 }}>{p.desc}</div>
                     </div>
                   </div>
@@ -76,7 +76,7 @@ export default function PipelinesPage() {
                 <div style={{ display:"flex",alignItems:"center",flexWrap:"wrap",gap:4,marginBottom:14 }}>
                   {p.steps.map((s,j) => (
                     <span key={s} style={{ display:"flex",alignItems:"center",gap:4 }}>
-                      <span style={{ padding:"3px 8px",borderRadius:"var(--r)",fontSize:10,fontFamily:"DM Mono,monospace",background:"var(--sur2)",border:"1px solid var(--bor)",color:"var(--tx3)" }}>{s}</span>
+                      <span style={{ padding:"3px 8px",borderRadius:"var(--r)",fontSize:10,fontFamily:"var(--font-mono)",background:"var(--sur2)",border:"1px solid var(--bor)",color:"var(--tx3)" }}>{s}</span>
                       {j<p.steps.length-1&&<span style={{ fontSize:11,color:"var(--tx4)" }}>→</span>}
                     </span>
                   ))}
@@ -90,14 +90,14 @@ export default function PipelinesPage() {
                 <button onClick={()=>run(p)} disabled={p.status==="running"}
                   style={{
                     padding:"9px 20px",borderRadius:"var(--r)",fontSize:13,fontWeight:700,
-                    fontFamily:"Syne,sans-serif",cursor:p.status==="running"?"not-allowed":"pointer",border:"none",
+                    cursor:p.status==="running"?"not-allowed":"pointer",border:"none",
                     display:"flex",alignItems:"center",gap:7,transition:"all .2s",
                     background:p.status==="success"?"var(--gr-bg)":p.status==="running"?"var(--sur2)":c.btn,
-                    color:p.status==="success"?"var(--gr)":p.status==="running"?"var(--tx3)":"#000",
+                    color:p.status==="success"?"var(--gr)":p.status==="running"?"var(--tx3)":"#fff",
                     opacity:p.status==="running"?.8:1,
                   }}>
                   {p.status==="running"?(
-                    <><span style={{ width:14,height:14,border:"2px solid rgba(0,0,0,.2)",borderTopColor:"rgba(0,0,0,.6)",borderRadius:"50%",animation:"spin .7s linear infinite",display:"inline-block"}}/>Running...</>
+                    <><span style={{ width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"var(--tx2)",borderRadius:"50%",animation:"spin .7s linear infinite",display:"inline-block"}}/>Running...</>
                   ):p.status==="success"?(
                     <>✅ Completed</>
                   ):(
@@ -115,11 +115,11 @@ export default function PipelinesPage() {
             <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 18px",borderBottom:"1px solid var(--bor)" }}>
               <div style={{ display:"flex",alignItems:"center",gap:8 }}>
                 <span className="status-dot status-online animate-pulse-dot"/>
-                <span style={{ fontFamily:"Syne,sans-serif",fontSize:13,fontWeight:700,color:"var(--tx)" }}>Execution Log</span>
+                <span style={{ fontSize:13,fontWeight:700,color:"var(--tx)" }}>Execution Log</span>
               </div>
               <button onClick={()=>setLog([])} style={{ background:"none",border:"none",fontSize:11,color:"var(--tx3)",cursor:"pointer" }}>✕ Clear</button>
             </div>
-            <div style={{ padding:18,background:"rgba(6,8,14,.6)",fontFamily:"DM Mono,monospace",fontSize:11,maxHeight:200,overflowY:"auto",display:"flex",flexDirection:"column",gap:6 }}>
+            <div style={{ padding:18,background:"var(--sur2)",fontFamily:"var(--font-mono)",fontSize:11,maxHeight:200,overflowY:"auto",display:"flex",flexDirection:"column",gap:6 }}>
               {log.map((l,i) => <span key={i} style={{ color:"var(--gr)",animation:"fadeIn .3s ease" }}>{l}</span>)}
             </div>
           </div>

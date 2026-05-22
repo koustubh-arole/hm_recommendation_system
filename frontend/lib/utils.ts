@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { Product } from "@/types";
 
 export function cn(...inputs: ClassValue[]) { return twMerge(clsx(inputs)); }
 
@@ -47,7 +46,7 @@ export function getClusterLabel(c: number): string {
 }
 export function getClusterColor(c: number): string {
   const m: Record<number, string> = {
-    3: "#C9A84C", // gold   — Champions
+    3: "#D97706", // amber  — Champions
     4: "#22C55E", // green  — Loyal
     0: "#3B82F6", // blue   — Potential
     2: "#F97316", // orange — At-Risk

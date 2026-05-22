@@ -4,13 +4,11 @@ import DashboardShell from "@/components/layout/DashboardShell";
 import ProductCard from "@/components/ui/ProductCard";
 import { recsAPI } from "@/services/api";
 import useAuthStore from "@/store/authStore";
-import type { Product, CustomerProfile } from "@/types";
-import { getClusterLabel } from "@/lib/utils";
+import type { Product } from "@/types";
 
 export default function RecommendationsPage() {
   const { user, isAuthenticated } = useAuthStore();
   const [recs, setRecs] = useState<Product[]>([]);
-  const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -28,86 +26,27 @@ export default function RecommendationsPage() {
     setLoading(true);
     setError(null);
 
-    Promise.allSettled([recsAPI.forCustomer(cid), recsAPI.profile(cid)])
-      .then(([r, p]) => {
-        if (r.status === "fulfilled") {
-          setRecs(r.value?.recommendations ?? []);
-        } else {
-          setError("Could not load recommendations. Please try again later.");
-        }
-        if (p.status === "fulfilled") setProfile(p.value);
-      })
+    recsAPI.forCustomer(cid)
+      .then((r) => setRecs(r?.recommendations ?? []))
+      .catch(() => setError("Could not load recommendations. Please try again later."))
       .finally(() => setLoading(false));
   }, [user?.customer_id, isAuthenticated]);
-
-  const clusterLabel = profile?.cluster != null ? getClusterLabel(profile.cluster) : null;
 
   return (
     <DashboardShell>
       <div style={{ maxWidth: 1100, margin: "0 auto", animation: "fadeUp .4s ease" }}>
 
-        {/* ── Header ── */}
+        {/* Header */}
         <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: 28, fontWeight: 800, color: "var(--tx)", marginBottom: 6 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 800, color: "var(--tx)", marginBottom: 6 }}>
             ✨ For You
           </h2>
           <p style={{ fontSize: 13, color: "var(--tx3)" }}>
-            AI-powered recommendations from your cluster — RFM + co-purchase analysis
+            AI-powered picks based on your style
           </p>
         </div>
 
-        {/* ── Cluster label banner ── */}
-        {clusterLabel && (
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: "var(--gold-bg)", border: "1px solid var(--gold-border2)",
-            borderRadius: "var(--r)", padding: "6px 14px",
-            marginBottom: 20,
-          }}>
-            <span style={{ fontSize: 14 }}>🏷️</span>
-            <span style={{ fontFamily: "Syne, sans-serif", fontSize: 13, fontWeight: 700, color: "var(--gold)" }}>
-              Your segment: {clusterLabel}
-            </span>
-          </div>
-        )}
-
-        {/* ── Customer profile card ── */}
-        {profile && (
-          <div style={{
-            background: "linear-gradient(135deg,rgba(201,168,76,.06),rgba(201,168,76,.02))",
-            border: "1px solid var(--gold-border2)", borderRadius: "var(--r2)",
-            padding: 20, marginBottom: 24,
-            display: "flex", gap: 20, alignItems: "center",
-          }}>
-            <div style={{ fontSize: 40 }}>🎯</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: "Syne, sans-serif", fontSize: 14, fontWeight: 700, color: "var(--tx)", marginBottom: 6 }}>
-                Your Customer Profile
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 12 }}>
-                {([
-                  ["Segment",   clusterLabel ?? "—"],
-                  ["Recency",   `${profile.recency}d ago`],
-                  ["Frequency", `${profile.frequency} orders`],
-                  ["Spend",     `₹${Math.round((profile.monetary ?? 0) * 590 * 83.5).toLocaleString("en-IN")}`],
-                ] as [string, string][]).map(([k, v]) => (
-                  <div key={k} style={{
-                    background: "var(--sur)", border: "1px solid var(--bor)",
-                    borderRadius: "var(--r)", padding: "6px 12px",
-                  }}>
-                    <div style={{ fontSize: 9, color: "var(--tx3)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 }}>{k}</div>
-                    <div style={{ fontFamily: "Syne, sans-serif", fontSize: 13, fontWeight: 700, color: "var(--gold)" }}>{v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div style={{ fontSize: 11, color: "var(--tx3)", fontFamily: "DM Mono, monospace" }}>
-              ID: {profile.customer_id?.slice(0, 16)}…
-            </div>
-          </div>
-        )}
-
-        {/* ── View toggle ── */}
+        {/* View toggle */}
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
           <div style={{
             display: "flex", gap: 2, background: "var(--sur)",
@@ -117,9 +56,9 @@ export default function RecommendationsPage() {
               <button key={v} onClick={() => setView(v)}
                 style={{
                   padding: "5px 10px", borderRadius: 6, fontSize: 12,
-                  background: view === v ? "var(--gold-bg)" : "none",
-                  border: `1px solid ${view === v ? "var(--gold-border)" : "transparent"}`,
-                  color: view === v ? "var(--gold)" : "var(--tx3)",
+                  background: view === v ? "var(--brand-muted)" : "none",
+                  border: `1px solid ${view === v ? "var(--brand-border)" : "transparent"}`,
+                  color: view === v ? "var(--brand)" : "var(--tx3)",
                   cursor: "pointer",
                 }}>
                 {v === "grid" ? "⊞" : "☰"}
@@ -128,7 +67,7 @@ export default function RecommendationsPage() {
           </div>
         </div>
 
-        {/* ── Error state ── */}
+        {/* Error */}
         {error && (
           <div style={{
             background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.3)",
@@ -139,7 +78,7 @@ export default function RecommendationsPage() {
           </div>
         )}
 
-        {/* ── Loading skeletons ── */}
+        {/* Loading skeletons */}
         {loading && (
           <div style={{
             display: "grid",
@@ -154,20 +93,20 @@ export default function RecommendationsPage() {
           </div>
         )}
 
-        {/* ── Empty state ── */}
+        {/* Empty state */}
         {!loading && !error && recs.length === 0 && (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>✨</div>
-            <div style={{ fontFamily: "Syne, sans-serif", fontSize: 18, fontWeight: 700, color: "var(--tx)", marginBottom: 8 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--tx)", marginBottom: 8 }}>
               {user?.customer_id ? "No recommendations yet" : "Please log in to see your picks"}
             </div>
             <div style={{ fontSize: 12, color: "var(--tx3)" }}>
-              Powered by cluster-based recommendations from your purchase history
+              AI picks curated from your purchase history
             </div>
           </div>
         )}
 
-        {/* ── Grid view ── */}
+        {/* Grid view */}
         {!loading && recs.length > 0 && view === "grid" && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
             {recs.slice(0, 20).map((p, i) => (
@@ -176,7 +115,7 @@ export default function RecommendationsPage() {
           </div>
         )}
 
-        {/* ── List view ── */}
+        {/* List view */}
         {!loading && recs.length > 0 && view === "list" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {recs.slice(0, 20).map((p, i) => (
@@ -188,17 +127,17 @@ export default function RecommendationsPage() {
                     src={`https://picsum.photos/seed/${p.article_id.replace(/\D/g, "").slice(0, 6)}/52/64`}
                     alt={p.product_name}
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    onError={(e) => { (e.target as HTMLImageElement).src = "https://via.placeholder.com/52x64/0A0D14/C9A84C?text=H"; }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 9, color: "var(--tx3)", textTransform: "uppercase", letterSpacing: 1 }}>{p.product_type_name}</div>
-                  <div style={{ fontFamily: "Syne, sans-serif", fontSize: 13, fontWeight: 700, color: "var(--tx)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--tx)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {p.product_name}
                   </div>
-                  {p.score && <div style={{ fontSize: 10, color: "var(--gold)", marginTop: 2 }}>✨ {(p.score * 100).toFixed(0)}% match</div>}
+                  {p.score && <div style={{ fontSize: 10, color: "var(--brand)", marginTop: 2 }}>✨ {(p.score * 100).toFixed(0)}% match</div>}
                 </div>
-                <div style={{ fontFamily: "Syne, sans-serif", fontSize: 15, fontWeight: 800, color: "var(--gold)", flexShrink: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: "var(--tx)", flexShrink: 0 }}>
                   {p.price != null ? `₹${Math.round(p.price).toLocaleString("en-IN")}` : "—"}
                 </div>
               </div>

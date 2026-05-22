@@ -63,13 +63,14 @@ export default function UsersPage() {
           <div style={{ position:"relative", flex:1, maxWidth:320 }}>
             <span style={{ position:"absolute",left:11,top:"50%",transform:"translateY(-50%)",fontSize:13 }}>🔍</span>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by username or email..."
-              style={{ width:"100%",background:"var(--sur)",border:"1px solid var(--bor2)",borderRadius:"var(--r)",padding:"9px 12px 9px 34px",color:"var(--tx)",fontSize:13,fontFamily:"DM Sans,sans-serif",outline:"none" }}
-              onFocus={e=>(e.target as HTMLElement).style.borderColor="var(--gold-border2)"}
-              onBlur={e=>(e.target as HTMLElement).style.borderColor="var(--bor2)"}
+              className="form-input"
+              style={{ paddingLeft:34 }}
+              onFocus={e=>(e.target as HTMLElement).style.borderColor="var(--brand)"}
+              onBlur={e=>(e.target as HTMLElement).style.borderColor="var(--bor)"}
             />
           </div>
           <div style={{ flex:1 }}/>
-          <button onClick={()=>setModal(true)} className="btn-gold"
+          <button onClick={()=>setModal(true)} className="btn-primary"
             style={{ padding:"9px 18px",fontSize:13,display:"flex",alignItems:"center",gap:7,borderRadius:"var(--r)" }}>
             ＋ New User
           </button>
@@ -95,10 +96,10 @@ export default function UsersPage() {
                   <tr><td colSpan={7} style={{ padding:"48px 18px",textAlign:"center",color:"var(--tx3)",fontSize:13 }}>No users found</td></tr>
                 ) : filtered.map(u => (
                   <tr key={u.id} className="table-row" style={{ borderBottom:"1px solid var(--bor)",transition:"background .15s" }}>
-                    <td style={{ padding:"12px 18px",fontFamily:"DM Mono,monospace",fontSize:11,color:"var(--tx4)" }}>{u.id}</td>
+                    <td style={{ padding:"12px 18px",fontFamily:"var(--font-mono)",fontSize:11,color:"var(--tx4)" }}>{u.id}</td>
                     <td style={{ padding:"12px 18px" }}>
                       <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-                        <div style={{ width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),#7A5018)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#000",flexShrink:0 }}>
+                        <div style={{ width:28,height:28,borderRadius:"50%",background:"var(--brand)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#fff",flexShrink:0 }}>
                           {u.username?.[0]?.toUpperCase()}
                         </div>
                         <span style={{ fontWeight:600,color:"var(--tx)",fontSize:13 }}>{u.username}</span>
@@ -108,7 +109,7 @@ export default function UsersPage() {
                     <td style={{ padding:"12px 18px" }}>
                       <span className={`badge ${u.role==="admin"?"badge-gold":"badge-blue"}`}>{u.role}</span>
                     </td>
-                    <td style={{ padding:"12px 18px",fontFamily:"DM Mono,monospace",fontSize:11,color:"var(--tx3)" }}>{u.customer_id||"—"}</td>
+                    <td style={{ padding:"12px 18px",fontFamily:"var(--font-mono)",fontSize:11,color:"var(--tx3)" }}>{u.customer_id||"—"}</td>
                     <td style={{ padding:"12px 18px",color:"var(--tx3)",fontSize:11 }}>{u.created_at ? formatDate(u.created_at) : "—"}</td>
                     <td style={{ padding:"12px 18px" }}>
                       <button onClick={()=>handleDelete(u.id)} disabled={deleting===u.id}
@@ -125,12 +126,12 @@ export default function UsersPage() {
 
         {/* Modal */}
         {modal && (
-          <div style={{ position:"fixed",inset:0,zIndex:50,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(6,8,14,.8)",backdropFilter:"blur(6px)",animation:"fadeIn .2s ease" }}
+          <div style={{ position:"fixed",inset:0,zIndex:50,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(15,23,42,.4)",backdropFilter:"blur(6px)",animation:"fadeIn .2s ease" }}
             onClick={()=>setModal(false)}>
             <div style={{ background:"var(--bg2)",border:"1px solid var(--bor2)",borderRadius:20,padding:"28px 28px 24px",width:"100%",maxWidth:460,animation:"scaleIn .2s ease",position:"relative" }}
               onClick={e=>e.stopPropagation()}>
               <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:22 }}>
-                <div style={{ fontFamily:"Syne,sans-serif",fontSize:18,fontWeight:800,color:"var(--tx)" }}>Create New User</div>
+                <div style={{ fontSize:18,fontWeight:800,color:"var(--tx)" }}>Create New User</div>
                 <button onClick={()=>setModal(false)} style={{ background:"none",border:"none",color:"var(--tx3)",fontSize:18,cursor:"pointer",lineHeight:1 }}>✕</button>
               </div>
               <form onSubmit={handleCreate} style={{ display:"flex",flexDirection:"column",gap:14 }}>
@@ -138,8 +139,8 @@ export default function UsersPage() {
                   <div key={k}>
                     <label style={{ display:"block",fontSize:10,fontWeight:700,color:"var(--tx2)",textTransform:"uppercase",letterSpacing:1,marginBottom:6 }}>{l}</label>
                     <input type={t} value={(form as unknown as Record<string,string>)[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} placeholder={p}
-                      style={{ width:"100%",background:"var(--sur2)",border:"1px solid var(--bor)",borderRadius:"var(--r)",padding:"10px 14px",color:"var(--tx)",fontSize:13,fontFamily:"DM Sans,sans-serif",outline:"none" }}
-                      onFocus={e=>(e.target as HTMLElement).style.borderColor="var(--gold-border2)"}
+                      className="form-input"
+                      onFocus={e=>(e.target as HTMLElement).style.borderColor="var(--brand)"}
                       onBlur={e=>(e.target as HTMLElement).style.borderColor="var(--bor)"}
                     />
                   </div>
@@ -148,8 +149,9 @@ export default function UsersPage() {
                   <label style={{ display:"block",fontSize:10,fontWeight:700,color:"var(--tx2)",textTransform:"uppercase",letterSpacing:1,marginBottom:6 }}>Password*</label>
                   <div style={{ position:"relative" }}>
                     <input type={showPw?"text":"password"} value={form.password} onChange={e=>setForm(f=>({...f,password:e.target.value}))} placeholder="Min 8 characters"
-                      style={{ width:"100%",background:"var(--sur2)",border:"1px solid var(--bor)",borderRadius:"var(--r)",padding:"10px 40px 10px 14px",color:"var(--tx)",fontSize:13,fontFamily:"DM Sans,sans-serif",outline:"none" }}
-                      onFocus={e=>(e.target as HTMLElement).style.borderColor="var(--gold-border2)"}
+                      className="form-input"
+                      style={{ paddingRight:40 }}
+                      onFocus={e=>(e.target as HTMLElement).style.borderColor="var(--brand)"}
                       onBlur={e=>(e.target as HTMLElement).style.borderColor="var(--bor)"}
                     />
                     <button type="button" onClick={()=>setShowPw(!showPw)} style={{ position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"var(--tx3)",cursor:"pointer",fontSize:14 }}>
@@ -162,10 +164,10 @@ export default function UsersPage() {
                   <div style={{ display:"flex",gap:10 }}>
                     {(["user","admin"] as const).map(r => (
                       <button key={r} type="button" onClick={()=>setForm(f=>({...f,role:r}))}
-                        style={{ flex:1,padding:"10px",borderRadius:"var(--r)",fontSize:13,fontWeight:700,fontFamily:"Syne,sans-serif",cursor:"pointer",border:"1px solid",textTransform:"capitalize",
-                          background:form.role===r?(r==="admin"?"linear-gradient(135deg,var(--gold),#9A6C1A)":"var(--bl-bg)"):"var(--sur2)",
-                          borderColor:form.role===r?(r==="admin"?"var(--gold-border2)":"var(--bl-bor)"):"var(--bor)",
-                          color:form.role===r?(r==="admin"?"#000":"var(--bl)"):"var(--tx3)",
+                        style={{ flex:1,padding:"10px",borderRadius:"var(--r)",fontSize:13,fontWeight:700,cursor:"pointer",border:"1px solid",textTransform:"capitalize",
+                          background:form.role===r?(r==="admin"?"var(--brand-muted)":"var(--bl-bg)"):"var(--sur2)",
+                          borderColor:form.role===r?(r==="admin"?"var(--brand-border)":"var(--bl-bor)"):"var(--bor)",
+                          color:form.role===r?(r==="admin"?"var(--brand)":"var(--bl)"):"var(--tx3)",
                         }}>
                         {r==="admin"?"⚡ Admin":"👤 User"}
                       </button>
@@ -175,9 +177,9 @@ export default function UsersPage() {
                 <div style={{ display:"flex",gap:10,paddingTop:4 }}>
                   <button type="button" onClick={()=>{setModal(false);setForm(EMPTY);}} className="btn-outline"
                     style={{ flex:1,padding:11,fontSize:13,borderRadius:"var(--r)" }}>Cancel</button>
-                  <button type="submit" disabled={saving} className="btn-gold"
+                  <button type="submit" disabled={saving} className="btn-primary"
                     style={{ flex:1,padding:11,fontSize:13,borderRadius:"var(--r)",display:"flex",alignItems:"center",justifyContent:"center",gap:7,opacity:saving?.7:1 }}>
-                    {saving?<><span style={{ width:14,height:14,border:"2px solid rgba(0,0,0,.2)",borderTopColor:"#000",borderRadius:"50%",animation:"spin .7s linear infinite",display:"inline-block"}}/>Creating...</>:"✓ Create User"}
+                    {saving?<><span style={{ width:14,height:14,border:"2px solid rgba(255,255,255,.3)",borderTopColor:"#fff",borderRadius:"50%",animation:"spin .7s linear infinite",display:"inline-block"}}/>Creating...</>:"✓ Create User"}
                   </button>
                 </div>
               </form>

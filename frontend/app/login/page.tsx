@@ -35,130 +35,153 @@ export default function LoginPage() {
       router.push(user?.role === "admin" ? "/overview" : "/home");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(msg || "Invalid credentials");
+      setError(msg || "Invalid credentials. Please try again.");
     }
   };
 
- const handleCustomerLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!customerId.trim()) { setError("Please enter a Customer ID"); return; }
-  setError("");
-  setCidLoading(true);
-  try {
-    const res = await api.post("/auth/login/customer", {
-      username: customerId.trim(),
-      password: "",
-    });
-    const data = res.data;
+  const handleCustomerLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerId.trim()) { setError("Please enter a Customer ID"); return; }
+    setError("");
+    setCidLoading(true);
+    try {
+      const res = await api.post("/auth/login/customer", {
+        username: customerId.trim(),
+        password: "",
+      });
+      const data = res.data;
 
-    // Save token to localStorage first
-    if (typeof window !== "undefined") {
-      localStorage.setItem("hm_token", data.access_token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("hm_token", data.access_token);
+      }
+
+      useAuthStore.setState({
+        user: {
+          id: 0,
+          username: data.username,
+          email: "",
+          role: "user",
+          customer_id: data.customer_id,
+        },
+        token: data.access_token,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      const persistKey = "hm-auth";
+      const existing = JSON.parse(localStorage.getItem(persistKey) || "{}");
+      existing.state = {
+        ...existing.state,
+        user: { id: 0, username: data.username, email: "", role: "user", customer_id: data.customer_id },
+        token: data.access_token,
+        isAuthenticated: true,
+      };
+      localStorage.setItem(persistKey, JSON.stringify(existing));
+
+      toast.success(`Welcome! Profile loaded for ${data.customer_id?.slice(0, 12)}...`);
+      router.push("/home");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      setError(msg || "Customer ID not found");
+    } finally {
+      setCidLoading(false);
     }
-
-    // Use the proper login flow via authStore so persist middleware saves it
-    useAuthStore.setState({
-      user: {
-        id: 0,
-        username: data.username,
-        email: "",
-        role: "user",
-        customer_id: data.customer_id,
-      },
-      token: data.access_token,
-      isAuthenticated: true,
-      isLoading: false,
-    });
-
-    // Also update the persisted storage key directly
-    const persistKey = "hm-auth";
-    const existing = JSON.parse(localStorage.getItem(persistKey) || "{}");
-    existing.state = {
-      ...existing.state,
-      user: {
-        id: 0,
-        username: data.username,
-        email: "",
-        role: "user",
-        customer_id: data.customer_id,
-      },
-      token: data.access_token,
-      isAuthenticated: true,
-    };
-    localStorage.setItem(persistKey, JSON.stringify(existing));
-
-    toast.success(`Welcome! Profile loaded for ${data.customer_id?.slice(0, 12)}...`);
-    router.push("/home");
-  } catch (err: unknown) {
-    const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-    setError(msg || "Customer ID not found");
-  } finally {
-    setCidLoading(false);
-  }
-};
+  };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "28px 20px" }}>
-      <div style={{ width: "100%", maxWidth: 460, animation: "fadeUp .4s ease both", position: "relative", zIndex: 2 }}>
-
-        {/* Brand */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-            <div style={{ width: 34, height: 34, background: "linear-gradient(135deg,var(--gold),#7A5018)", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Syne, sans-serif", fontSize: 10, fontWeight: 800, color: "#000", letterSpacing: -1 }}>H&amp;M</div>
-            <span style={{ fontFamily: "Syne, sans-serif", fontSize: 15, fontWeight: 800, color: "var(--gold)" }}>Retail AI</span>
-          </div>
-          <h1 style={{ fontFamily: "Syne, sans-serif", fontSize: "clamp(36px,6vw,56px)", fontWeight: 800, lineHeight: .95, letterSpacing: -2, marginBottom: 12 }}>
-            Intelligence<br /><span style={{ color: "var(--gold)" }}>at Scale.</span>
-          </h1>
-          <p style={{ fontSize: 13, color: "var(--tx3)", lineHeight: 1.7, maxWidth: 360, margin: "0 auto" }}>
-            Personalised recommendations, customer segmentation,<br />and demand forecasting — unified.
-          </p>
-        </div>
-
-        {/* Mode toggle */}
-        <div style={{ display: "flex", gap: 4, background: "var(--sur)", padding: 4, borderRadius: "var(--r2)", border: "1px solid var(--bor)", marginBottom: 20 }}>
-          {(["credentials", "customer"] as const).map((m) => (
-            <button key={m} onClick={() => { setMode(m); setError(""); }}
-              style={{
-                flex: 1, padding: "8px 12px", borderRadius: "var(--r)", fontSize: 12, fontWeight: 700,
-                fontFamily: "Syne, sans-serif", cursor: "pointer", border: "none",
-                background: mode === m ? "var(--gold-bg)" : "transparent",
-                color: mode === m ? "var(--gold)" : "var(--tx3)",
-                transition: "all .2s",
-              }}>
-              {m === "credentials" ? "🔐 Username / Password" : "🆔 Customer ID"}
-            </button>
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      background: "var(--bg)",
+    }}>
+      {/* Left panel — branding */}
+      <div style={{
+        flex: "0 0 420px",
+        background: "var(--brand)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        padding: "60px 48px",
+        color: "#fff",
+      }} className="login-left">
+        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", opacity: .7, marginBottom: 20 }}>H&M Retail AI</div>
+        <h1 style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", marginBottom: 20, color: "#fff" }}>
+          Intelligence<br />at Scale.
+        </h1>
+        <p style={{ fontSize: 14, opacity: .8, lineHeight: 1.7, maxWidth: 320, color: "#fff" }}>
+          Personalised recommendations, customer segmentation, and demand forecasting — unified in one platform.
+        </p>
+        <div style={{ marginTop: 48, display: "flex", flexDirection: "column", gap: 16 }}>
+          {[
+            ["✨", "AI-powered recommendations"],
+            ["📊", "RFM customer segmentation"],
+            ["📈", "30-day demand forecasting"],
+          ].map(([ic, lb]) => (
+            <div key={lb} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13, opacity: .85 }}>
+              <span style={{ fontSize: 16 }}>{ic}</span>
+              <span style={{ color: "#fff" }}>{lb}</span>
+            </div>
           ))}
         </div>
+      </div>
 
-        {/* Auth card */}
-        <div style={{
-          background: "rgba(11,15,22,.9)", backdropFilter: "blur(28px)",
-          border: "1px solid var(--bor2)", borderRadius: 26, padding: "36px 36px 32px",
-          position: "relative", overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,.65)",
-        }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,var(--gold-border2),transparent)" }} />
+      {/* Right panel — form */}
+      <div style={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 24px",
+      }}>
+        <div style={{ width: "100%", maxWidth: 440, animation: "fadeUp .4s ease both" }}>
 
+          {/* Header */}
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, background: "var(--brand)", borderRadius: 10, fontSize: 13, fontWeight: 800, color: "#fff", letterSpacing: -1, marginBottom: 16 }}>H&M</div>
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: "var(--tx)", letterSpacing: "-0.03em", marginBottom: 6 }}>Sign in to your account</h2>
+            <p style={{ fontSize: 13, color: "var(--tx3)" }}>Welcome back — enter your credentials to continue</p>
+          </div>
+
+          {/* Mode toggle */}
+          <div style={{ display: "flex", gap: 0, background: "var(--sur)", borderRadius: "var(--r)", border: "1.5px solid var(--bor)", marginBottom: 24, overflow: "hidden" }}>
+            {(["credentials", "customer"] as const).map((m) => (
+              <button key={m} onClick={() => { setMode(m); setError(""); }}
+                style={{
+                  flex: 1, padding: "9px 12px", fontSize: 12, fontWeight: 600,
+                  cursor: "pointer", border: "none",
+                  background: mode === m ? "var(--brand)" : "transparent",
+                  color: mode === m ? "#fff" : "var(--tx3)",
+                  transition: "all .18s",
+                }}>
+                {m === "credentials" ? "🔐 Username / Password" : "🆔 Customer ID"}
+              </button>
+            ))}
+          </div>
+
+          {/* Error */}
           {error && (
-            <div style={{ background: "var(--rd-bg)", border: "1px solid var(--rd-bor)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 12, color: "var(--rd)", textAlign: "center", marginBottom: 14 }}>
-              {error}
+            <div style={{ background: "var(--rd-bg)", border: "1px solid var(--rd-bor)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 13, color: "var(--rd)", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+              ⚠️ {error}
             </div>
           )}
 
           {mode === "credentials" ? (
             <>
-              {/* Role selector */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+              {/* Role quick-fill */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
                 {(["admin", "user"] as const).map((r) => (
                   <button key={r} type="button" onClick={() => fillDemo(r)}
                     style={{
-                      background: role === r ? (r === "admin" ? "var(--gold-bg)" : "var(--bl-bg)") : "var(--sur2)",
-                      border: `2px solid ${role === r ? (r === "admin" ? "var(--gold-border2)" : "rgba(59,130,246,.4)") : "var(--bor2)"}`,
-                      borderRadius: 16, padding: "14px 12px", cursor: "pointer", textAlign: "center", transition: "all .22s",
+                      background: role === r ? (r === "admin" ? "var(--brand-muted)" : "var(--bl-bg)") : "var(--sur)",
+                      border: `1.5px solid ${role === r ? (r === "admin" ? "var(--brand-border)" : "var(--bl-bor)") : "var(--bor)"}`,
+                      borderRadius: "var(--r)", padding: "14px 12px", cursor: "pointer", textAlign: "center", transition: "all .18s",
                     }}>
-                    <div style={{ fontSize: 24, marginBottom: 6 }}>{r === "admin" ? "⚡" : "👤"}</div>
-                    <div style={{ fontFamily: "Syne, sans-serif", fontSize: 12, fontWeight: 700, color: role === r ? (r === "admin" ? "var(--gold)" : "var(--bl)") : "var(--tx2)" }}>
+                    <div style={{ fontSize: 22, marginBottom: 6 }}>{r === "admin" ? "⚡" : "👤"}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: role === r ? (r === "admin" ? "var(--brand)" : "var(--bl)") : "var(--tx2)" }}>
                       {r === "admin" ? "Admin Portal" : "User Portal"}
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--tx4)", marginTop: 2 }}>
+                      {r === "admin" ? "admin / admin123" : "koustubh / user123"}
                     </div>
                   </button>
                 ))}
@@ -166,71 +189,82 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit}>
                 <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "var(--tx2)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 7 }}>Username</label>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--tx3)", marginBottom: 6 }}>Username</label>
                   <input type="text" value={username} onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username" className="form-input" autoComplete="username" />
                 </div>
-                <div style={{ marginBottom: 22 }}>
-                  <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "var(--tx2)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 7 }}>Password</label>
+                <div style={{ marginBottom: 24 }}>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--tx3)", marginBottom: 6 }}>Password</label>
                   <div style={{ position: "relative" }}>
                     <input type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password" className="form-input" autoComplete="current-password" />
+                      placeholder="Enter password" className="form-input" autoComplete="current-password"
+                      style={{ paddingRight: 42 }} />
                     <button type="button" onClick={() => setShowPass(!showPass)}
-                      style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--tx3)", cursor: "pointer", fontSize: 14 }}>
+                      style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--tx3)", cursor: "pointer", fontSize: 14, padding: 0 }}>
                       {showPass ? "🙈" : "👁"}
                     </button>
                   </div>
                 </div>
-                <button type="submit" disabled={isLoading} className="btn-gold"
-                  style={{ width: "100%", padding: 13, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: isLoading ? .7 : 1 }}>
-                  {isLoading ? "Signing in..." : <><span>Sign in</span><span>→</span></>}
+                <button type="submit" disabled={isLoading} className="btn-primary"
+                  style={{ width: "100%", padding: 13, fontSize: 14, borderRadius: "var(--r)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: isLoading ? .7 : 1 }}>
+                  {isLoading
+                    ? <><span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin .7s linear infinite", display: "inline-block" }} /> Signing in…</>
+                    : "Sign in →"}
                 </button>
               </form>
             </>
           ) : (
             <>
-              <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{ fontSize: 36, marginBottom: 8 }}>🆔</div>
-                <div style={{ fontFamily: "Syne, sans-serif", fontSize: 15, fontWeight: 700, color: "var(--tx)", marginBottom: 6 }}>Login with Customer ID</div>
-                <div style={{ fontSize: 12, color: "var(--tx3)" }}>Enter your H&M customer ID to load your personalised recommendations</div>
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontSize: 13, color: "var(--tx3)", marginBottom: 16 }}>
+                  Enter your H&M customer ID to load your personalised recommendations.
+                </p>
+                <form onSubmit={handleCustomerLogin}>
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "var(--tx3)", marginBottom: 6 }}>Customer ID</label>
+                    <input
+                      type="text"
+                      value={customerId}
+                      onChange={(e) => setCustomerId(e.target.value)}
+                      placeholder="e.g. 00006413d8573cd2..."
+                      className="form-input"
+                      style={{ fontFamily: "monospace", fontSize: 11 }}
+                    />
+                  </div>
+
+                  <div style={{ background: "var(--sur2)", border: "1px solid var(--bor)", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 11, color: "var(--tx3)", marginBottom: 20 }}>
+                    Demo ID:{" "}
+                    <span
+                      style={{ color: "var(--brand)", cursor: "pointer", fontFamily: "monospace", wordBreak: "break-all" }}
+                      onClick={() => setCustomerId("00006413d8573cd20ed7128e53b7b13819fe5cfc2d801fe7fc0f26dd8d65a85a")}
+                    >
+                      00006413d8573cd20...
+                    </span>
+                    <span style={{ color: "var(--tx4)" }}> (click to fill)</span>
+                  </div>
+
+                  <button type="submit" disabled={cidLoading} className="btn-primary"
+                    style={{ width: "100%", padding: 13, fontSize: 14, borderRadius: "var(--r)", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: cidLoading ? .7 : 1 }}>
+                    {cidLoading
+                      ? <><span style={{ width: 14, height: 14, border: "2px solid rgba(255,255,255,.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin .7s linear infinite", display: "inline-block" }} /> Loading profile…</>
+                      : "Load My Profile →"}
+                  </button>
+                </form>
               </div>
-
-              <form onSubmit={handleCustomerLogin}>
-                <div style={{ marginBottom: 8 }}>
-                  <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "var(--tx2)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 7 }}>Customer ID</label>
-                  <input
-                    type="text"
-                    value={customerId}
-                    onChange={(e) => setCustomerId(e.target.value)}
-                    placeholder="e.g. 00006413d8573cd2..."
-                    className="form-input"
-                    style={{ fontFamily: "DM Mono, monospace", fontSize: 11 }}
-                  />
-                </div>
-
-                {/* Demo hint */}
-                <div style={{ background: "var(--sur2)", border: "1px solid var(--bor2)", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 10, color: "var(--tx3)", marginBottom: 20, fontFamily: "DM Mono, monospace", wordBreak: "break-all" }}>
-                  Demo ID: <span
-                    style={{ color: "var(--gold)", cursor: "pointer" }}
-                    onClick={() => setCustomerId("00006413d8573cd20ed7128e53b7b13819fe5cfc2d801fe7fc0f26dd8d65a85a")}
-                  >
-                    00006413d8573cd20ed7128e53b7b13819fe5cfc2d801fe7fc0f26dd8d65a85a
-                  </span>
-                </div>
-
-                <button type="submit" disabled={cidLoading} className="btn-gold"
-                  style={{ width: "100%", padding: 13, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: cidLoading ? .7 : 1 }}>
-                  {cidLoading ? "Loading profile..." : <><span>Load My Profile</span><span>→</span></>}
-                </button>
-              </form>
             </>
           )}
-        </div>
 
-        <p style={{ textAlign: "center", fontSize: 10, color: "var(--tx4)", marginTop: 20, letterSpacing: 1, textTransform: "uppercase" }}>
-          H&M RETAIL AI PLATFORM V2.0
-        </p>
+          <p style={{ textAlign: "center", fontSize: 11, color: "var(--tx4)", marginTop: 24 }}>
+            H&M Retail AI Platform · v2.0
+          </p>
+        </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .login-left { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }

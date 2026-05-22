@@ -27,12 +27,12 @@ const MOCK_SERVICES: ServiceStatus[] = [
 
 const STATUS_COLORS: Record<Health, { bg:string; bor:string; tx:string; dot:string }> = {
   healthy:  { bg:"var(--gr-bg)",              bor:"var(--gr-bor)",     tx:"var(--gr)",   dot:"status-online"  },
-  degraded: { bg:"rgba(201,168,76,.08)",      bor:"var(--gold-border)", tx:"var(--gold)", dot:"status-warning" },
+  degraded: { bg:"var(--am-bg)",              bor:"var(--am-bor)",      tx:"var(--am)",   dot:"status-warning" },
   down:     { bg:"var(--rd-bg)",              bor:"var(--rd-bor)",     tx:"var(--rd)",   dot:"status-error"   },
 };
 
-const FONT = "Inter, 'DM Sans', system-ui, sans-serif";
-const MONO = "'Roboto Mono', 'DM Mono', monospace";
+const FONT = "Inter, system-ui, sans-serif";
+const MONO = "var(--font-mono)";
 
 export default function SystemPage() {
   const [services,   setServices]   = useState<ServiceStatus[]>(MOCK_SERVICES);
@@ -92,22 +92,22 @@ export default function SystemPage() {
 
         {/* API error notice */}
         {fetchError && (
-          <div style={{ padding:"10px 16px", marginBottom:16, background:"rgba(201,168,76,.07)", border:"1px solid var(--gold-border)", borderRadius:"var(--r)", fontSize:12, color:"var(--gold)", fontFamily:FONT }}>
+          <div style={{ padding:"10px 16px", marginBottom:16, background:"var(--am-bg)", border:"1px solid var(--am-bor)", borderRadius:"var(--r)", fontSize:12, color:"var(--am)", fontFamily:FONT }}>
             ⚠️ {fetchError} — <span style={{ color:"var(--tx3)" }}>Showing last known state.</span>
           </div>
         )}
 
         {/* Overall status banner */}
         <div style={{
-          background: allHealthy ? "var(--gr-bg)" : anyDown ? "var(--rd-bg)" : "rgba(201,168,76,.07)",
-          border: `1px solid ${allHealthy ? "var(--gr-bor)" : anyDown ? "var(--rd-bor)" : "var(--gold-border)"}`,
+          background: allHealthy ? "var(--gr-bg)" : anyDown ? "var(--rd-bg)" : "var(--am-bg)",
+          border: `1px solid ${allHealthy ? "var(--gr-bor)" : anyDown ? "var(--rd-bor)" : "var(--am-bor)"}`,
           borderRadius:"var(--r2)", padding:"18px 22px", marginBottom:28,
           display:"flex", alignItems:"center", justifyContent:"space-between",
         }}>
           <div style={{ display:"flex", alignItems:"center", gap:14 }}>
             <span style={{ fontSize:32 }}>{allHealthy ? "✅" : anyDown ? "❌" : "⚠️"}</span>
             <div>
-              <div style={{ fontFamily:FONT, fontSize:18, fontWeight:700, color: allHealthy ? "var(--gr)" : anyDown ? "var(--rd)" : "var(--gold)" }}>
+              <div style={{ fontFamily:FONT, fontSize:18, fontWeight:700, color: allHealthy ? "var(--gr)" : anyDown ? "var(--rd)" : "var(--am)" }}>
                 {allHealthy ? "All Systems Operational" : anyDown ? "Service Disruption Detected" : "Degraded Performance"}
               </div>
               <div style={{ fontSize:11, color:"var(--tx3)", marginTop:2, fontFamily:MONO }}>
@@ -176,7 +176,7 @@ export default function SystemPage() {
             ].map(({ label, value }) => (
               <div key={label} style={{ background:"var(--sur2)", borderRadius:"var(--r)", padding:"10px 14px" }}>
                 <div style={{ fontSize:9, color:"var(--tx3)", textTransform:"uppercase", letterSpacing:1.2, marginBottom:4, fontFamily:FONT }}>{label}</div>
-                <div style={{ fontFamily:MONO, fontSize:12, fontWeight:500, color:"var(--gold)" }}>{value}</div>
+                <div style={{ fontFamily:MONO, fontSize:12, fontWeight:500, color:"var(--tx2)" }}>{value}</div>
               </div>
             ))}
           </div>
@@ -198,7 +198,7 @@ export default function SystemPage() {
               <div key={f.path} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 14px", background:"var(--sur2)", borderRadius:"var(--r)", border:"1px solid var(--bor)" }}>
                 <span style={{ fontSize:14 }}>📄</span>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontFamily:MONO, fontSize:11, color:"var(--gold)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{f.path}</div>
+                  <div style={{ fontFamily:MONO, fontSize:11, color:"var(--tx2)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{f.path}</div>
                   <div style={{ fontSize:10, color:"var(--tx3)", marginTop:1, fontFamily:FONT }}>{f.desc}</div>
                 </div>
                 <span className="badge badge-green" style={{ fontFamily:MONO, fontSize:10 }}>{f.size}</span>

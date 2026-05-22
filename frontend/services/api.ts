@@ -27,7 +27,7 @@ api.interceptors.response.use(
   async (err: AxiosError) => {
     const config = err.config as AxiosRequestConfig & { _retryCount?: number };
     if (err.response?.status === 401) {
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
         localStorage.removeItem("hm_token");
         localStorage.removeItem("hm_user");
         window.location.href = "/login";
